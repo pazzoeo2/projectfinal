@@ -1,0 +1,28 @@
+{% load crispy_forms_tags %}
+
+<!DOCTYPE html>
+<html lang="eng" style="height:100%;">
+  <head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="utf-8">
+    <title>{% block title %}{% endblock %}</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" integrity="sha384-JcKb8q3iqJ61gNV9KGb8thSsNjpSL0n8PARn9HuZOnIxN0hoP+VmmDGMN5t9UJ0Z" crossorigin="anonymous">
+  </head>
+  <body style="height:100%;">
+    <div class="container h-100">
+        <div class="row h-100 justify-content-center align-items-center">
+            {% block action %}{% endblock %}
+                <h1 class="col text-center">{% block header %}{% endblock %}</h1><br>
+                {% csrf_token %}
+                {{form|crispy}}
+                <div class="col text-center">
+                    <button type="submit" class="pl-3 btn btn-primary">{% block button %}{% endblock %}</button>
+                </div><br>
+                {% if message %}
+                    <p class="alert alert-danger">{{message}}</p>
+                {% endif %}
+            </form>
+        </div>
+    </div>
+  </body>
+</html>

@@ -1,0 +1,7 @@
+{% extends 'diary/layout.html' %}
+
+{% block title %}Diary{% endblock %}
+
+{% block body %}
+    {{request.user.username}}
+{% endblock %}

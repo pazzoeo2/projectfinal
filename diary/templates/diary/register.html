@@ -1,0 +1,13 @@
+{% extends 'diary/layoutlogin.html' %}
+
+{% block title %}Diary - Register{% endblock %}
+
+{% block action %}
+    <form class="form-group" action="{% url 'register' %}" method="post">
+{% endblock %}
+
+{% block button %}Register{% endblock %}
+
+{% block header %}
+Register
+{% endblock %}
