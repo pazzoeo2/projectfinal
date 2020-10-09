@@ -1,0 +1,66 @@
+{% extends 'diary/layout.html' %}
+
+{% block title %}Diary - View{% endblock title %}
+
+{% block body %}
+    <div class="container-fluid">
+        {% for year, months in gamelist.items %}
+            <h1 class="ml-5">{{year}}</h1>
+            <table class="table table-borderless rounded shadow-lg">
+                {% for month, games in months.items %}
+                    <tr>
+                        <td class="month"><h2>
+                            {% if month == 1 %}
+                                January
+                            {% elif month == 2 %}
+                                February
+                            {% elif month == 3 %}
+                                March
+                            {% elif month == 4 %}
+                                April
+                            {% elif month == 5 %}
+                                May
+                            {% elif month == 6 %}
+                                June
+                            {% elif month == 7 %}
+                                July
+                            {% elif month == 8 %}
+                                August
+                            {% elif month == 9 %}
+                                September
+                            {% elif month == 10 %}
+                                October
+                            {% elif month == 11 %}
+                                November
+                            {% elif month == 12 %}
+                                December
+                            {% endif %}
+                        </h2></td>
+                        <td class="content border">
+                            <h3>Started</h3>
+                            <div class="d-flex">
+                                {% for entry in games.started %}
+                                    <div class="card card-block shadow mx-1">
+                                        <a href="/entry/{{entry.id}}"><img class="card-img-top" src="{{entry.game.cover}}" alt="Game cover"></a>
+                                        <a href="/entry/{{entry.id}}" class="card-text">{{entry.game.name}}</a>
+                                    </div>
+                                {% endfor %}
+                            </div>
+                        </td>
+                        <td class="content border">
+                            <h3>Finished</h3>
+                            <div class="d-flex">
+                                {% for entry in games.finished %}
+                                    <div class="card card-block shadow mx-1">
+                                        <a href="/entry/{{entry.id}}"><img class="card-img-top" src="{{entry.game.cover}}" alt="Game cover"></a>
+                                        <a href="/entry/{{entry.id}}" class="card-text">{{entry.game.name}}</a>
+                                    </div>
+                                {% endfor %}
+                            </div>
+                        </td>
+                    </tr>
+                {% endfor %}
+            </table>
+        {% endfor %}
+    </div>
+{% endblock body %}

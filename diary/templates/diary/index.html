@@ -1,7 +1,31 @@
 {% extends 'diary/layout.html' %}
+{% load static %}
 
 {% block title %}Diary{% endblock %}
 
 {% block body %}
-    {{request.user.username}}
+    <h1 style="text-align: center">{{request.user.username}}'s Diary</h1>
+    <h4 style="text-align: center"><a href="{% url 'logout' %}">Logout</a></h4>
+    <div class="container h-100">
+        <div class="row h-100 justify-content-center">
+            <img src="{% static 'diary/new.png' %}" class="col-lg-3 col-sm-6 indexbutton img-fluid">
+            <img src="{% static 'diary/view.png' %}" class="col-lg-3 col-sm-6 indexbutton img-fluid">
+            <h2 style="margin-top: 50px; text-align: center">Welcome back!<br> Played anything?</h2>
+            <div class="container-fluid">
+                <div class="row flex-nowrap overflow-auto">
+                    {% for playinggame in playinglist %}
+                        <div class="col-lg-3 col-sm-6 mt-4">
+                            <div class="card card-block">
+                                <img class="card-img-top" src="{{playinggame.game.cover}}" alt="Game cover">
+                                <div class="row card-body">
+                                    <input type="number" class="ml-1 mr-1 cardbox">hours
+                                    <button class="btn btn-sm btn-primary cardbutton">+</button>
+                                </div>
+                            </div>
+                        </div> 
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
 {% endblock %}

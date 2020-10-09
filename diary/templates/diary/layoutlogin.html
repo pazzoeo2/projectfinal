@@ -18,6 +18,10 @@
                 <div class="col text-center">
                     <button type="submit" class="pl-3 btn btn-primary">{% block button %}{% endblock %}</button>
                 </div><br>
+                <div class="col text-center">
+                    {% block register %}
+                    {% endblock %}
+                </div><br>
                 {% if message %}
                     <p class="alert alert-danger">{{message}}</p>
                 {% endif %}

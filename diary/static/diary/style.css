@@ -1,0 +1,51 @@
+.indexbutton {
+  border-radius: 25%;
+  margin-top: 0%;
+  margin-right: 100px;
+  margin-left: 100px;
+}
+
+@media (max-width: 990px) {
+  .indexbutton {
+    margin-right: 0px;
+    margin-left: 0px;
+    width: 170px;
+  }
+}
+
+.cardbutton {
+  margin-left: auto;
+  margin-right: 10px;
+  border-radius: 50%;
+  height: 30px;
+  width: 30px;
+}
+
+.cardbox {
+  width: 60px;
+}
+
+@media (max-width: 990px) {
+  .cardbox {
+    width: 30px;
+  }
+}
+
+table .month {
+  width: 10%;
+  color: orange;
+}
+
+table .content {
+  width: 45%;
+  border: 3px solid black;
+}
+
+table .card-block {
+  width: 20%;
+}
+
+table .card-text {
+  text-align: center;
+}
+/*# sourceMappingURL=style.css.map */
