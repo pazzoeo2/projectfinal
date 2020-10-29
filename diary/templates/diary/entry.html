@@ -1,7 +1,156 @@
 {% extends 'diary/layout.html' %}
+{% load static %}
+
+{% block head %}
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <script>
+        function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    // Does this cookie string begin with the name we want?
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            document.querySelector('#deletebutton').onclick = () => {
+                // Delete button
+                checkbox = document.getElementById("confirmremove")
+                if (checkbox.checked == true) {
+                    console.log(checkbox.value)
+                    fetch("/delete", {
+                        method: 'POST',
+                        credentials: "same-origin",
+                        headers: {
+                            "X-CSRFToken": getCookie('csrftoken'),
+                            "Accept": "application/json",
+                            "Content-Type": "application/json"
+                        },
+                        body: JSON.stringify({
+                            "entry": checkbox.value 
+                        })
+                    })
+                    .then(response => response.json())
+                    .then(result => {
+                        if (result["success"] == true) {
+                            alert("Entry Deleted!")
+                            window.location.href = '/view'
+                        } else {
+                            alert("There was an error, try again.")
+                        }
+                    })
+                }
+            }
+            // Save button
+            document.querySelector('#submitbutton').onclick = () => {
+                started = document.querySelector('#started').value
+                finished = document.querySelector('#finished').value
+                completed = document.querySelector('#completed').value
+                timeplayed = document.querySelector('#timeplayed').value
+                status = document.querySelector('#status').value
+                review = document.querySelector('#review').value
+                if (status == "Finished" && finished == '') {
+                    alert("Add a finish date.")
+                } else {
+                    fetch("/editentry", {
+                        method: 'POST',
+                        credentials: "same-origin",
+                        headers: { 
+                            "X-CSRFToken": getCookie('csrftoken'),
+                            "Accept": "application/json",
+                            "Content-Type": "application/json" 
+                        },
+                        body: JSON.stringify({
+                            "entryid": document.getElementById("confirmremove").value,
+                            "started": started,
+                            "finished": finished,
+                            "completed": completed,
+                            "timeplayed": timeplayed,
+                            "status": status,
+                            "review": review
+                        })
+                    })
+                    .then(response => response.json())
+                    .then(result => {
+                        if (result["success"]) {
+                            window.location.href = `/entry/${result["entryid"]}`;
+                        } else {
+                            alert(result["error"])
+                        }
+                    })
+                }
+            }
+        })
+    </script>
+{% endblock %}
 
 {% block title %}Diary - Entry{% endblock %}
 
 {% block body %}
-    Test!! {{entry.id}} {{entry.game.name}}
+    <div class="modal fade" id="inputModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true" style="display: none;">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLabel">Editing Entry</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                    <div class="modal-body">
+                        Started<input class="form-control" type="date" id="started"><br>
+                        Finished (only if status is finished) <input class="form-control" type="date" id="finished"><br>
+                        Completed (optional) <input class="form-control" type="date" id="completed"><br>
+                        Time played (optional) <input class="form-control" type="number" id="timeplayed"><br>
+                        Status<select class="form-control" id="status">
+                            <option>-No change-</option>
+                            <option>Finished</option>
+                            <option>Playing</option>
+                        </select><br>
+                        Review (optional)<textarea class="form-control" id="review"></textarea>
+                    </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-primary" id="submitbutton">Save Edits</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="container mt-5 text-center">
+        <img src="{{entry.game.cover}}" class="float-md-left shadow">
+        <div>
+            <h1 id="gamename">{{entry.game.name}}</h1>
+            <h2>Status: {{entry.status}}</h2>
+            <h3 class="mt-5">Started: {{entry.started}} - Finished: {% if entry.finished %} {{entry.finished}} {% else %} Not finished yet {% endif %}</h3>
+            {% if entry.completed %}<h3>🏆Completed: {{entry.completed}}🏆</h3>{% endif %}
+            {% if entry.timeplayed %}<h4>Played for approximately {{entry.timeplayed}} hours</h4>{% endif %}
+            {% if entry.review %}
+                <div class="container shadow text-center reviewbox">
+                    <h4>Personal Review:</h4>
+                    <p class="text-left">{{entry.review}}</p>
+                </div>
+            {% else %}
+                <h4 class="mt-5 text-center">There is no personal review available.</h4>
+            {% endif %}
+        </div>
+        <div style="margin-top: 40px;">
+            <button class="btn btn-light entrybutton" data-toggle="modal", data-target="#inputModal"> Edit </button>
+            <button class="btn btn-danger entrybutton" id="deletebutton"> Delete </button>
+            <input type="checkbox" id="confirmremove" value="{{entry.id}}"> (tick to confirm)
+        </div>
+    </div>
+    <a href="{% url 'view' %}">
+        <div class="backbutton">
+            <img src="{% static '/diary/list.svg' %}" style="width: 80%; margin-top: 10%;">
+        </div>
+    </a>
 {% endblock %}

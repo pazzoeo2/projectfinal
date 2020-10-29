@@ -1,0 +1,181 @@
+{% extends 'diary/layout.html' %}
+{% load static %}
+{% block title %}Diary - Add{% endblock %}
+
+{% block head %}
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <script>
+        function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    // Does this cookie string begin with the name we want?
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            document.querySelector('#searchbutton').onclick = () => {
+                let searchquery = document.querySelector('#searchbar').value
+                console.log(searchquery)
+                fetch("/searchquery", {
+                    method: 'POST',
+                    credentials: "same-origin",
+                    headers: {
+                        "X-CSRFToken": getCookie('csrftoken'),
+                        "Accept": "application/json",
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({
+                        "searchterm": searchquery,
+                    })
+                })
+                .then(response => response.json())
+                .then(result => {
+                    console.log(result)
+                    console.log(result.length)
+                    document.querySelectorAll('.card').forEach(card => {
+                        // Clear results
+                        card.remove()
+                    })
+                    for (i=0;i<result.length;i++) {
+                        // Creates card
+
+                        var card = document.createElement("div")
+                        card.setAttribute('class', 'card card-block shadow mt-5')
+
+                        var linkimage = document.createElement("a")
+                        linkimage.setAttribute('href', 'javascript:void(0)')
+                        linkimage.setAttribute('data-id', `${result[i]["id"]}`)
+                        linkimage.setAttribute('data-toggle', 'modal')
+                        linkimage.setAttribute('data-target', '#inputModal')
+
+                        var cardimage = document.createElement("img")
+                        cardimage.setAttribute('class', 'card-img-top addlink')
+                        if (result[i]["cover"]) {
+                            cardimage.setAttribute('src', `https://images.igdb.com/igdb/image/upload/t_cover_big/${result[i]["cover"]["image_id"]}.jpg`)
+                        } else {
+                            cardimage.setAttribute('src', "{% static 'diary/nocover.png' %}")
+                        }
+                        cardimage.setAttribute('data-id', `${result[i]["id"]}`)
+                        cardimage.setAttribute('data-toggle', 'modal')
+                        cardimage.setAttribute('data-target', '#inputModal')
+
+                        var cardlink = document.createElement("a")
+                        cardlink.setAttribute('href', 'javascript:void(0)')
+                        cardlink.setAttribute('class', 'card-text addlink')
+                        cardlink.setAttribute('data-id', `${result[i]["id"]}`)
+                        cardlink.setAttribute('data-toggle', 'modal')
+                        cardlink.setAttribute('data-target', '#inputModal')
+
+                        var cardtext = document.createTextNode(result[i]["name"])
+
+                        cardlink.appendChild(cardtext)
+                        linkimage.appendChild(cardimage)
+                        card.appendChild(linkimage)
+                        card.appendChild(cardlink)
+
+                        var element = document.getElementById("resultbox")
+                        element.appendChild(card);
+                    }
+                    document.querySelectorAll('.addlink').forEach(link => {
+                        link.onclick = () => {
+                            // Adds functionality to cards
+                            console.log("done")
+                            button = document.querySelector('#addbutton')
+                            button.onclick = () => {
+                                // Adds function to submit button
+                                started = document.querySelector('#started').value
+                                finished = document.querySelector('#finished').value
+                                completed = document.querySelector('#completed').value
+                                timeplayed = document.querySelector('#timeplayed').value
+                                status = document.querySelector('#status').value
+                                review = document.querySelector('#review').value
+                                if (status == "Finished" && finished == '' || started == '' || status == '') {
+                                    alert("Fill in every required field.")
+                                } else {
+                                    fetch("/addgame", {
+                                        method: 'POST',
+                                        credentials: "same-origin",
+                                        headers: { 
+                                            "X-CSRFToken": getCookie('csrftoken'),
+                                            "Accept": "application/json",
+                                            "Content-Type": "application/json" 
+                                        },
+                                        body: JSON.stringify({
+                                            "gameid": link.dataset.id,
+                                            "started": started,
+                                            "finished": finished,
+                                            "completed": completed,
+                                            "timeplayed": timeplayed,
+                                            "status": status,
+                                            "review": review
+                                        })
+                                    })
+                                    .then(response => response.json())
+                                    .then(result => {
+                                        if (result["success"]) {
+                                            window.location.href = `/entry/${result["entryid"]}`;
+                                        } else {
+                                            alert(result["error"])
+                                        }
+                                    })
+                                }
+                            }
+                        }
+                    })
+                })
+            }
+        })
+    </script>
+{% endblock %}
+
+{% block body %}
+    <div class="modal fade" id="inputModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true" style="display: none;">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLabel">Adding Game</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                    <div class="modal-body">
+                        Started<input class="form-control" type="date" id="started"><br>
+                        Finished (only if status is finished) <input class="form-control" type="date" id="finished"><br>
+                        Completed (optional) <input class="form-control" type="date" id="completed"><br>
+                        Time played (optional) <input class="form-control" type="number" id="timeplayed"><br>
+                        Status<select class="form-control" id="status">
+                            <option>Finished</option>
+                            <option>Playing</option>
+                        </select><br>
+                        Review (optional)<textarea class="form-control" id="review"></textarea>
+                    </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-primary" id="addbutton">Sumbit Game</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="container-fluid row">
+        <input type="search" placeholder="Search for a game..." class="searchbar mx-auto mt-5" id="searchbar">
+        <button class="btn mx-auto mt-5 searchbutton btn-primary" id="searchbutton">🔍</button>
+    </div>
+    <div class="d-flex flex-wrap" id="resultbox">
+    </div>
+    <a href="{% url 'index' %}">
+        <div class="backbutton">
+            <img src="{% static '/diary/home.svg' %}" style="width: 80%; margin-top: 5%;">
+        </div>
+    </a>
+{% endblock body %}

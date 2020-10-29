@@ -1,4 +1,5 @@
 {% extends 'diary/layout.html' %}
+{% load static %}
 
 {% block title %}Diary - View{% endblock title %}
 
@@ -9,7 +10,7 @@
             <table class="table table-borderless rounded shadow-lg">
                 {% for month, games in months.items %}
                     <tr>
-                        <td class="month"><h2>
+                        <td class="month"><h2 class="titletext">
                             {% if month == 1 %}
                                 January
                             {% elif month == 2 %}
@@ -37,8 +38,8 @@
                             {% endif %}
                         </h2></td>
                         <td class="content border">
-                            <h3>Started</h3>
-                            <div class="d-flex">
+                            <h3 class="titletext">Started</h3>
+                            <div class="d-flex flex-wrap">
                                 {% for entry in games.started %}
                                     <div class="card card-block shadow mx-1">
                                         <a href="/entry/{{entry.id}}"><img class="card-img-top" src="{{entry.game.cover}}" alt="Game cover"></a>
@@ -46,10 +47,15 @@
                                     </div>
                                 {% endfor %}
                             </div>
+                            <ul class="viewlist">
+                                {% for entry in games.started %}
+                                    <li class="listitem"><a href="/entry/{{entry.id}}">{{entry.game.name}}</a></li>
+                                {% endfor %}
+                            </ul>
                         </td>
                         <td class="content border">
-                            <h3>Finished</h3>
-                            <div class="d-flex">
+                            <h3 class="titletext">Finished</h3>
+                            <div class="d-flex flex-wrap">
                                 {% for entry in games.finished %}
                                     <div class="card card-block shadow mx-1">
                                         <a href="/entry/{{entry.id}}"><img class="card-img-top" src="{{entry.game.cover}}" alt="Game cover"></a>
@@ -57,10 +63,36 @@
                                     </div>
                                 {% endfor %}
                             </div>
+                            <ul class="viewlist">
+                                {% for entry in games.finished %}
+                                    <li class="listitem"><a href="/entry/{{entry.id}}">{{entry.game.name}}</a></li>
+                                {% endfor %}
+                            </ul>
+                        </td>
+                        <td class="content border">
+                            <h3 class="titletext">Playing</h3>
+                            <div class="d-flex flex-wrap">
+                                {% for entry in games.continued %}
+                                    <div class="card card-block shadow mx-1">
+                                        <a href="/entry/{{entry.id}}"><img class="card-img-top" src="{{entry.game.cover}}" alt="Game cover"></a>
+                                        <a href="/entry/{{entry.id}}" class="card-text">{{entry.game.name}}</a>
+                                    </div>
+                                {% endfor %}
+                            </div>
+                            <ul class="viewlist">
+                                {% for entry in games.continued %}
+                                    <li class="listitem"><a href="/entry/{{entry.id}}">{{entry.game.name}}</a></li>
+                                {% endfor %}
+                            </ul>
                         </td>
                     </tr>
                 {% endfor %}
             </table>
         {% endfor %}
     </div>
+    <a href="{% url 'index' %}">
+        <div class="backbutton">
+            <img src="{% static '/diary/home.svg' %}" style="width: 80%; margin-top: 5%;">
+        </div>
+    </a>
 {% endblock body %}

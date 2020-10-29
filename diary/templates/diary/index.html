@@ -3,23 +3,76 @@
 
 {% block title %}Diary{% endblock %}
 
+{% block head %}
+    <script>
+        function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    // Does this cookie string begin with the name we want?
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            document.querySelectorAll('.cardbutton').forEach(button => {
+                // Add index card functionality
+                button.onclick = () => {
+                    hourstoadd = document.querySelector(`#hours${button.dataset.id}`).value
+                    fetch("/addhours", {
+                        method: 'POST',
+                        credentials: "same-origin",
+                        headers: {
+                            "X-CSRFToken": getCookie('csrftoken'),
+                            "Accept": "application/json",
+                            "Content-Type": "application/json"
+                        },
+                        body: JSON.stringify({
+                            "id": button.dataset.id,
+                            "hours": hourstoadd
+                        })
+                    })
+                    .then(response => response.json())
+                    .then(result => {
+                        if (result["success"]) {
+                            cardbody = document.querySelector(`#cardbody${button.dataset.id}`)
+                            cardbody.innerHTML = "Hours added!"
+                        }
+                    })
+                }
+            })
+        })
+    </script>
+{% endblock %}
+
 {% block body %}
     <h1 style="text-align: center">{{request.user.username}}'s Diary</h1>
     <h4 style="text-align: center"><a href="{% url 'logout' %}">Logout</a></h4>
     <div class="container h-100">
         <div class="row h-100 justify-content-center">
-            <img src="{% static 'diary/new.png' %}" class="col-lg-3 col-sm-6 indexbutton img-fluid">
-            <img src="{% static 'diary/view.png' %}" class="col-lg-3 col-sm-6 indexbutton img-fluid">
+            <div class="col-lg-3 col-sm-6 indexdiv">
+                <a href="/add"><img src="{% static 'diary/new.png' %}" class="img-fluid indexbutton"></a>
+            </div>
+            <div class="col-lg-3 col-sm-6 indexdiv">
+                <a href="/view"><img src="{% static 'diary/view.png' %}" class="img-fluid indexbutton"></a>
+            </div>
             <h2 style="margin-top: 50px; text-align: center">Welcome back!<br> Played anything?</h2>
             <div class="container-fluid">
                 <div class="row flex-nowrap overflow-auto">
                     {% for playinggame in playinglist %}
                         <div class="col-lg-3 col-sm-6 mt-4">
-                            <div class="card card-block">
-                                <img class="card-img-top" src="{{playinggame.game.cover}}" alt="Game cover">
-                                <div class="row card-body">
-                                    <input type="number" class="ml-1 mr-1 cardbox">hours
-                                    <button class="btn btn-sm btn-primary cardbutton">+</button>
+                            <div class="card card-block indexcard">
+                                <a href="/entry/{{playinggame.id}}"><img class="card-img-top" src="{{playinggame.game.cover}}" alt="Game cover"></a>
+                                <div class="row card-body" id="cardbody{{playinggame.id}}">
+                                    <input type="number" class="ml-1 mr-1 cardbox" id="hours{{playinggame.id}}">hours
+                                    <button class="btn btn-sm btn-primary cardbutton" data-id="{{playinggame.id}}">+</button>
                                 </div>
                             </div>
                         </div> 

@@ -15,3 +15,10 @@ class Entry(models.Model):
     timeplayed = models.IntegerField(blank=True, null=True)
     status = models.CharField(max_length=20, blank=True)
     review = models.CharField(max_length=1000, blank=True)
+    stoppedplaying = models.DateField(blank=True, null=True)
+    completed = models.DateField(blank=True, null=True)
+
+class DailyPlaytime(models.Model):
+    entry = models.OneToOneField(Entry, on_delete=models.CASCADE)
+    date = models.DateField()
+    hours = models.IntegerField()
