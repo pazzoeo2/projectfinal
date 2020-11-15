@@ -1,5 +1,3 @@
 django
 requests
 django-crispy-forms
-pyodbc
-django-pyodbc-azure
